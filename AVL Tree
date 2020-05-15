@@ -1,0 +1,175 @@
+public class Tree
+    {
+        public int key;
+        public int height;
+        public Tree left;
+        public Tree right;
+        public Tree(int x)
+        {
+            height = 1;
+            key = x;
+        }
+
+    }
+public class Btree
+    {
+        public Tree root;
+        public Btree(){}
+        public void Insert(int x)
+        {
+            //if (root == null)
+            //    root = new Tree(x);
+            //else
+            //    insert(root, x);
+            root = insert(root, x);
+        }
+        private int height(Tree p)
+        {
+            return p == null ? 0 : height(p.left) - height(p.right);
+        }
+        private int getBalance(Tree p)
+        {
+            return p == null ? 0 : height(p.left) - height(p.right);
+        }
+
+        private Tree insert(Tree p,int x)
+        {
+            if (p == null)
+                return new Tree(x);
+            if (x < p.key)
+                p.left = insert(p.left, x);
+            else
+                p.right = insert(p.right,x);
+            p.height = 1 + Math.Max(height(p.left), height(p.right));
+
+            int balance = getBalance(p);
+            if (balance > 1 && x < p.left.key)
+                return rRot(p);
+            if (balance < -1 && x > p.left.key)
+                return lRot(p);
+            if (balance > 1 && x > p.left.key)
+            {
+                p.left = lRot(p.left);
+                return rRot(p);
+            }
+            if (balance < -1 && x < p.right.key)
+            {
+                p.right = rRot(p.right);
+                return lRot(p);
+            }
+            return p;
+        }
+        
+        public void Print()
+        {
+            print(root, 0);
+        }
+        private void print(Tree p,int shift)
+        {
+            if (p.left != null)
+                print(p.left, shift + 1);
+            for(int i = 0; i != shift; i++)
+            {
+                Console.Write("  ");
+            }
+            Console.WriteLine(p.key);
+            if (p.right != null)
+                print(p.right, shift + 1);
+        }
+        public void store(Tree p, List<Tree> nodes)
+        {
+            if (p == null)
+                return;
+            store(p.left, nodes);
+            nodes.Add(p);
+            store(p.right, nodes);
+        }
+        public Tree buildtree(Tree p)
+        {
+            var nodes = new List<Tree>();
+            store(p, nodes);
+            return buildit(nodes, 0, nodes.Count - 1);
+        }
+        public Tree buildit(List<Tree> nodes, int start, int end)
+        {
+            if (start > end)
+                return null;
+            int mid = (start + end) / 2;
+            Tree p = nodes[mid];
+            p.left = buildit(nodes, start, mid - 1);
+            p.right = buildit(nodes, mid + 1, end);
+            return p;
+        }
+        public List<List<int>> get_lists()
+        {
+            var lst = new List<List<int>>();
+            lst.Add(new List<int>());
+            print(root, 0);
+            return lst;
+        }
+        public void print_tree(Tree n, int step, List<List<int>> lst)
+        {
+            if (n.right != null)
+            {
+                print_tree(n.right, step + 1, lst);
+            }
+            for (int i = 0; i < step; i++)
+                lst.Last().Add(-1);
+            //lst.Last().Add(n.data);
+            lst.Add(new List<int>());
+            if (n.left != null)
+            {
+                print_tree(n.left, step + 1, lst);
+            }
+        }
+        public Tree RotateRight(Tree rt)
+        {
+            var piv = rt.left;
+            rt.left = piv.right;
+            piv.right = rt;
+            return piv;
+        }
+        public Tree RotateLeft(Tree rt)
+        {
+            var piv = rt.right;
+            rt.right = rt.left;
+            piv.left = rt;
+            return piv;
+        }
+        public Tree rRot(Tree y)
+        {
+            var x = y.left;
+            var T2 = x.right;
+            x.right = y;
+            y.left = T2;
+            y.height = Math.Max(height(y.left), height(y.right)) + 1;
+            x.height = Math.Max(height(x.left), height(x.right)) + 1;
+            return x;
+        }
+        public Tree lRot(Tree x)
+        {
+            var y = x.right;
+            var T2 = y.left;
+            y.left = x;
+            x.right = T2;
+            y.height = Math.Max(height(y.left), height(y.right)) + 1;
+            x.height = Math.Max(height(x.left), height(x.right)) + 1;
+            return y;
+        }
+    }
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var obj = new Btree();
+            var rnd = new System.Random(1);
+            int[] init = {5, 6, 7, 8, 9, 10, 11, 12, 4, 3, 2, 1, 0} /*Enumerable.Range(0, 15).OrderBy(x => rnd.Next()).ToArray()*/; 
+            foreach (var i in init)
+                obj.Insert(i);
+            obj.Print();
+            
+
+
+
+        }
+    }
